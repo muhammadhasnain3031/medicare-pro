@@ -3,8 +3,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/Sidebar';
-
-
+import ChatBot from '@/components/ChatBot';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -24,8 +23,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-gray-50">
+      {/* 1. Sidebar sirf aik baar yahan */}
       <Sidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
+
+      {/* 2. Main Content Area - overflow-auto aur min-w-0 takay responsive masle na hon */}
+      <main className="flex-1 overflow-auto min-w-0">
+        {children}
+      </main>
+
+      {/* 3. Floating ChatBot */}
+      <ChatBot />
     </div>
   );
 }

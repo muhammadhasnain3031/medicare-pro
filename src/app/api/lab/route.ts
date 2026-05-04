@@ -35,10 +35,14 @@ export async function GET(req: NextRequest) {
     if (status && status !== 'all') query.status = status;
     if (user.role === 'patient') query.patient = user.id;
 
+    // ✅ LabTest model import karo properly
+    const LabTest = (await import('@/models/LabTest')).default;
+
     const tests = await LabTest.find(query)
       .populate('patient', 'name phone bloodGroup')
       .populate('doctor',  'name specialization')
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean(); // ✅ plain objects return karo
 
     return NextResponse.json({ tests });
   } catch (err: any) {
@@ -55,14 +59,18 @@ export async function POST(req: NextRequest) {
     await connectDB();
     const body = await req.json();
 
+    const LabTest = (await import('@/models/LabTest')).default;
+
     const test = await LabTest.create({
       ...body,
-      ...(user.role === 'patient' ? { patient: user.id } : {}),
+      paid:          false, // ✅ explicit default
+      paymentMethod: '',
     });
 
     const populated = await LabTest.findById(test._id)
       .populate('patient', 'name phone bloodGroup')
-      .populate('doctor',  'name specialization');
+      .populate('doctor',  'name specialization')
+      .lean();
 
     return NextResponse.json({ test: populated }, { status: 201 });
   } catch (err: any) {

@@ -6,10 +6,11 @@ interface Patient {
   phone: string; bloodGroup: string; dateOfBirth: string; address: string;
 }
 
-export default function AdminPatients() {
+export default function DoctorPatients() {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
+  const [selected, setSelected] = useState<Patient | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/users?role=patient')
@@ -19,28 +20,22 @@ export default function AdminPatients() {
 
   const filtered = patients.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.email.toLowerCase().includes(search.toLowerCase())
+    p.email.toLowerCase().includes(search.toLowerCase()) ||
+    (p.phone || '').includes(search)
   );
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this patient?')) return;
-    await fetch(`/api/admin/users?id=${id}`, { method: 'DELETE' });
-    setPatients(prev => prev.filter(p => p._id !== id));
-  };
-
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Patients</h1>
-          <p className="text-gray-500 mt-1">{patients.length} registered patients</p>
-        </div>
+    <div className="p-4 md:p-6 max-w-5xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-xl md:text-2xl font-bold text-gray-900">🤒 My Patients</h1>
+        <p className="text-gray-500 text-sm mt-1">{patients.length} registered patients</p>
       </div>
 
-      <div className="card p-4 mb-6">
+      <div className="mb-5">
         <input value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Search patients by name or email..."
-          className="input-field" />
+          placeholder="Search by name, email or phone..."
+          className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       </div>
 
       {loading ? (
@@ -48,58 +43,88 @@ export default function AdminPatients() {
           <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full" />
         </div>
       ) : (
-        <div className="card overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                {['Patient','Phone','Blood Group','DOB','Address','Actions'].map(h => (
-                  <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filtered.map(p => (
-                <tr key={p._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-sm">
-                        {p.name.charAt(0)}
+        <>
+          {/* Mobile — list view */}
+          <div className="block md:hidden space-y-3">
+            {filtered.map(p => (
+              <div key={p._id}
+                onClick={() => setSelected(selected?._id === p._id ? null : p)}
+                className={`bg-white rounded-2xl border-2 p-4 transition-all ${
+                  selected?._id === p._id ? 'border-blue-400' : 'border-gray-100'
+                }`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                    {p.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{p.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{p.email}</p>
+                  </div>
+                  {p.bloodGroup && (
+                    <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">
+                      {p.bloodGroup}
+                    </span>
+                  )}
+                </div>
+                {selected?._id === p._id && (
+                  <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+                    {[
+                      ['📞', p.phone || 'N/A'],
+                      ['🎂', p.dateOfBirth || 'N/A'],
+                      ['📍', p.address || 'N/A'],
+                    ].map(([icon, val]) => (
+                      <div key={icon as string} className="bg-gray-50 rounded-xl p-2">
+                        <p className="text-xs text-gray-400">{icon}</p>
+                        <p className="text-xs font-semibold text-gray-700 truncate">{val}</p>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900 text-sm">{p.name}</p>
-                        <p className="text-xs text-gray-500">{p.email}</p>
-                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop — grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map(p => (
+              <div key={p._id} className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-xl">
+                    {p.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-900 truncate">{p.name}</p>
+                    <p className="text-xs text-gray-500 truncate">{p.email}</p>
+                  </div>
+                  {p.bloodGroup && (
+                    <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full flex-shrink-0">
+                      {p.bloodGroup}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  {[
+                    ['📞 Phone', p.phone || 'N/A'],
+                    ['🎂 DOB',   p.dateOfBirth || 'N/A'],
+                    ['📍 Area',  p.address || 'N/A'],
+                  ].map(([k, v]) => (
+                    <div key={k as string} className="flex justify-between text-sm">
+                      <span className="text-gray-400 text-xs">{k}</span>
+                      <span className="font-medium text-gray-700 text-xs truncate max-w-[140px]">{v}</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{p.phone || 'N/A'}</td>
-                  <td className="px-4 py-3">
-                    {p.bloodGroup ? (
-                      <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded-full">
-                        {p.bloodGroup}
-                      </span>
-                    ) : <span className="text-gray-400 text-sm">N/A</span>}
-                  </td>
-                  <td className="px-4 py-3 text-sm text-gray-600">{p.dateOfBirth || 'N/A'}</td>
-                  <td className="px-4 py-3 text-sm text-gray-600 max-w-[150px] truncate">{p.address || 'N/A'}</td>
-                  <td className="px-4 py-3">
-                    <button onClick={() => handleDelete(p._id)}
-                      className="text-xs bg-red-50 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-100 font-medium">
-                      Remove
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
           {filtered.length === 0 && (
             <div className="text-center py-16 text-gray-400">
               <p className="text-3xl mb-2">🤒</p>
               <p>No patients found</p>
             </div>
           )}
-        </div>
+        </>
       )}
     </div>
   );
