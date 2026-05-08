@@ -1,5 +1,6 @@
 'use client';
-import { useEffect } from 'react';
+// 1. Yahan 'useState' add kar diya hai
+import { useEffect, useState } from 'react'; 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Sidebar from '@/components/Sidebar';
@@ -8,9 +9,21 @@ import ChatBot from '@/components/ChatBot';
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  
+  // 2. State definition (Ab ye define hai)
+  const [mob, setMob] = useState(false);
 
+  // Body scroll lock logic
   useEffect(() => {
-    if (!loading && (!user || user.role !== 'admin')) router.push('/login');
+    document.body.style.overflow = mob ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [mob]);
+
+  // Auth Protection logic
+  useEffect(() => {
+    if (!loading && (!user || user.role !== 'admin')) {
+      router.push('/login');
+    }
   }, [user, loading, router]);
 
   if (loading) return (
@@ -23,15 +36,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* 1. Sidebar sirf aik baar yahan */}
+      {/* Note: Agar aapka Sidebar mobile par open/close hota hai, 
+         to aapko 'mob' aur 'setMob' usay pass karne chahiye 
+      */}
       <Sidebar />
 
-      {/* 2. Main Content Area - overflow-auto aur min-w-0 takay responsive masle na hon */}
       <main className="flex-1 overflow-auto min-w-0">
         {children}
       </main>
 
-      {/* 3. Floating ChatBot */}
       <ChatBot />
     </div>
   );

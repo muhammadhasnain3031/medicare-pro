@@ -78,6 +78,17 @@ if (!await User.findOne({ email: 'reception@medicare.com' })) {
   });
   created.push('receptionist');
 }
+// pharmacy 
+if (!await User.findOne({ email: 'pharmacy@medicare.com' })) {
+  await User.create({
+    name:     'Pharmacist Ali',
+    email:    'pharmacy@medicare.com',
+    role:     'pharmacist',
+    password: await bcrypt.hash('pharma123', 10),
+    phone:    '+92-300-7777777',
+  });
+  created.push('pharmacist');
+}
 
 // Nurse
 if (!await User.findOne({ email: 'nurse@medicare.com' })) {

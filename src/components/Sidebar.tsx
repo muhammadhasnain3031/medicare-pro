@@ -11,12 +11,19 @@ interface NavItem {
 }
 
 const adminNav: NavItem[] = [
-  { href: '/admin',              icon: '📊', label: 'Dashboard'    },
-  { href: '/admin/doctors',      icon: '👨‍⚕️', label: 'Doctors'      },
-  { href: '/admin/patients',     icon: '🤒', label: 'Patients'     },
-  { href: '/admin/appointments', icon: '📅', label: 'Appointments' },
-  { href: '/admin/add-user',     icon: '➕', label: 'Add User'     },
+  { href: '/admin',               icon: '📊', label: 'Dashboard'     },
+  { href: '/admin/analytics',     icon: '📈', label: 'Analytics'     },
+  { href: '/admin/doctors',       icon: '👨‍⚕️', label: 'Doctors'       },
+  { href: '/admin/patients',      icon: '🤒', label: 'Patients'      },
+  { href: '/admin/appointments',  icon: '📅', label: 'Appointments'  },
+  { href: '/beds',                icon: '🛏️', label: 'Bed Mgmt'      }, // ✅ NEW
+  { href: '/pharmacy',            icon: '💊', label: 'Pharmacy'      },
+  { href: '/billing',             icon: '💰', label: 'Billing'       },
+  { href: '/admin/security',      icon: '🔐', label: 'Security'      },
+  { href: '/admin/notifications', icon: '📱', label: 'Notifications' },
+  { href: '/admin/add-user',      icon: '➕', label: 'Add User'      },
 ];
+
 
 const doctorNav: NavItem[] = [
   { href: '/doctor',                       icon: '📊', label: 'Dashboard'      },
@@ -35,11 +42,12 @@ const patientNav: NavItem[] = [
 ];
 
 const receptionistNav: NavItem[] = [
-  { href: '/receptionist',              icon: '📊', label: 'Dashboard'       },
-  { href: '/receptionist/appointments', icon: '📅', label: 'Appointments'    },
-  { href: '/receptionist/patients',     icon: '🤒', label: 'Patients'        },
-  { href: '/receptionist/book',         icon: '➕', label: 'Book Appointment'},
-  { href: '/receptionist/billing',      icon: '💰', label: 'Billing'         },
+  { href: '/receptionist',              icon: '📊', label: 'Dashboard'        },
+  { href: '/receptionist/appointments', icon: '📅', label: 'Appointments'     },
+  { href: '/receptionist/patients',     icon: '🤒', label: 'Patients'         },
+  { href: '/receptionist/book',         icon: '➕', label: 'Book Appointment' },
+  { href: '/billing',                   icon: '💰', label: 'Billing'          }, 
+  { href: '/pharmacy',                  icon: '💊', label: 'Pharmacy'         },
 ];
 
 const nurseNav: NavItem[] = [
@@ -49,6 +57,15 @@ const nurseNav: NavItem[] = [
   { href: '/nurse/appointments', icon: '📅', label: 'Appointments' },
   { href: '/nurse/notes',        icon: '📝', label: 'Nurse Notes'  },
 ];
+
+const pharmacistNav: NavItem[] = [
+  { href: '/pharmacy',          icon: '📊', label: 'Dashboard'    },
+  { href: '/pharmacy/stock',    icon: '💊', label: 'Medicine Stock'},
+  { href: '/pharmacy/billing',  icon: '💰', label: 'Create Bill'  },
+  { href: '/pharmacy/bills',    icon: '📋', label: 'Bills History' },
+  { href: '/pharmacy/alerts',   icon: '🚨', label: 'Alerts'       },
+];
+
 
 const labNav: NavItem[] = [
   { href: '/lab',           icon: '📊', label: 'Dashboard'   },
@@ -64,7 +81,9 @@ const navMap: Record<string, NavItem[]> = {
   patient:      patientNav,
   receptionist: receptionistNav,
   nurse:        nurseNav,
+  pharmacist:   pharmacistNav,
   lab:          labNav,
+
 };
 
 const roleConfig: Record<string, { gradient: string; label: string; emoji: string }> = {
@@ -73,6 +92,7 @@ const roleConfig: Record<string, { gradient: string; label: string; emoji: strin
   patient:      { gradient: 'from-green-600 to-emerald-700', label: 'Patient',      emoji: '🤒'  },
   receptionist: { gradient: 'from-pink-600 to-rose-700',     label: 'Receptionist', emoji: '💁'  },
   nurse:        { gradient: 'from-teal-600 to-cyan-700',     label: 'Nurse',        emoji: '👩‍⚕️' },
+    pharmacist: { gradient: 'from-green-600 to-emerald-700', label: 'Pharmacist', emoji: '💊' },
   lab:          { gradient: 'from-orange-600 to-amber-700',  label: 'Lab Staff',    emoji: '🔬'  },
 };
 

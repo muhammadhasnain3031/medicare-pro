@@ -26,10 +26,7 @@ export default function DoctorLayout({ children }: { children: React.ReactNode }
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="flex-1 overflow-auto">{children}</main>
-       <Sidebar />
-    <main className="flex-1 overflow-auto min-w-0">
-      {children}
-    </main>
+      
     {/* ✅ ChatBot har page pe floating */}
     <ChatBot />
     </div>

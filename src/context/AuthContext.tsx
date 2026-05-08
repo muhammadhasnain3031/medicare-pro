@@ -62,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     patient:      '/patient',
     receptionist: '/receptionist',
     nurse:        '/nurse',
+    pharmacist:   '/pharmacy',
     lab:          '/lab',
   };
   router.push(routes[data.user.role] || '/');

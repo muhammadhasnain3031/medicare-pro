@@ -365,7 +365,8 @@ export default function LabTests() {
                 </div>
 
                 {/* Status + Actions */}
-                <div className="flex flex-col items-end gap-2 flex-shrink-0 min-w-[120px]">
+                <div className="flex flex-row md:flex-col flex-wrap justify-end gap-2 flex-shrink-0">
+
 
                   {/* Status Badge */}
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full border w-full text-center ${STATUS_STYLES[test.status]}`}>

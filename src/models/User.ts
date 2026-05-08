@@ -27,7 +27,7 @@ const UserSchema = new Schema<IUser>({
   name:             { type: String, required: true },
   email:            { type: String, required: true, unique: true },
   password:         { type: String, required: true },
-  role:             { type: String,   enum: ['superadmin','admin','doctor','patient','receptionist','nurse','lab'], 
+  role:             { type: String,   enum:['admin','doctor','patient','receptionist','nurse','lab','pharmacist','superadmin'], 
  required: true },
   phone:            { type: String, default: '' },
   avatar:           { type: String, default: '' },

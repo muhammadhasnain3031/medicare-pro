@@ -3,16 +3,14 @@ import bcrypt from 'bcryptjs';
 import { connectDB } from '@/lib/db';
 import { signToken } from '@/lib/auth';
 import User from '@/models/User';
+import { createAuditLog, AUDIT_ACTIONS, AUDIT_MODULES } from '@/lib/audit';
 
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
     const { email, password, tenantSlug } = await req.json();
 
-    // Query banao
     const query: any = { email };
-
-    // Agar tenantSlug diya toh us tenant ka user dhundo
     if (tenantSlug && tenantSlug !== 'superadmin') {
       const Tenant = (await import('@/models/Tenant')).default;
       const tenant = await Tenant.findOne({ slug: tenantSlug, active: true });
@@ -21,13 +19,35 @@ export async function POST(req: NextRequest) {
     }
 
     const user = await User.findOne(query).populate('tenant', 'name slug primaryColor logo');
-    if (!user || !(await bcrypt.compare(password, user.password)))
+
+    // ✅ Failed login audit
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      await createAuditLog({
+        action:  AUDIT_ACTIONS.LOGIN_FAILED,
+        module:  AUDIT_MODULES.AUTH,
+        details: `Failed login attempt for email: ${email}`,
+        status:  'failed',
+        req,
+      });
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 400 });
+    }
 
     const token = signToken({
       id:       user._id,
       role:     user.role,
       tenantId: user.tenant?._id || null,
+    });
+
+    // ✅ Successful login audit
+    await createAuditLog({
+      userId:   user._id.toString(),
+      userName: user.name,
+      userRole: user.role,
+      action:   AUDIT_ACTIONS.LOGIN,
+      module:   AUDIT_MODULES.AUTH,
+      details:  `User logged in successfully`,
+      status:   'success',
+      req,
     });
 
     const res = NextResponse.json({

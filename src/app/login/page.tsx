@@ -26,6 +26,7 @@ function LoginForm() {
   { role: 'Patient',      email: 'patient@medicare.com',      password: 'patient123', color: 'bg-green-50 border-green-200 text-green-700'    },
   { role: 'Receptionist', email: 'reception@medicare.com',    password: 'recep123',   color: 'bg-pink-50 border-pink-200 text-pink-700'       },
   { role: 'Nurse',        email: 'nurse@medicare.com',        password: 'nurse123',   color: 'bg-teal-50 border-teal-200 text-teal-700'       },
+  { role:'Pharmacist', email:'pharmacy@medicare.com', password:'pharma123', color:'bg-green-50 border-green-200 text-green-700' },
   { role: 'Lab Staff',    email: 'lab@medicare.com',          password: 'lab123',     color: 'bg-orange-50 border-orange-200 text-orange-700' },
  
 ];
