@@ -1,79 +1,185 @@
-// src/lib/notification-templates.ts
-
 export const NotificationTemplates = {
-  appointmentConfirmed: (patientName: string, doctorName: string, date: string, time: string) => `
-🏥 *MediCare Pro*
-✅ *Appointment Confirmed*
+
+  appointmentConfirmed: (
+    patientName: string,
+    doctorName:  string,
+    date:        string,
+    time:        string
+  ) => `🏥 *MediCare Pro*
+
+✅ *Appointment Confirmed!*
 
 Hello ${patientName},
-Your appointment with Dr. ${doctorName} is confirmed.
+
+Your appointment has been confirmed:
+👨‍⚕️ Doctor: Dr. ${doctorName}
 📅 Date: ${date}
 ⏰ Time: ${time}
-Thank you for choosing MediCare Pro.`.trim(),
 
-  appointmentReminder: (patientName: string, doctorName: string, date: string, time: string) => `
-🏥 *MediCare Pro*
-⏰ *Reminder: Appointment*
+Please arrive 10 minutes early.
+
+_MediCare Pro — Your Health, Our Priority_`.trim(),
+
+  appointmentReminder: (
+    patientName: string,
+    doctorName:  string,
+    date:        string,
+    time:        string
+  ) => `🏥 *MediCare Pro*
+
+⏰ *Appointment Reminder*
 
 Hello ${patientName},
-Friendly reminder for your appointment with Dr. ${doctorName}.
+
+Reminder for your appointment:
+👨‍⚕️ Doctor: Dr. ${doctorName}
 📅 Date: ${date}
 ⏰ Time: ${time}
-Please arrive 10 minutes early.`.trim(),
 
-  appointmentCancelled: (patientName: string, date: string) => `
-🏥 *MediCare Pro*
+Please bring your previous reports.
+
+_MediCare Pro_`.trim(),
+
+  appointmentCancelled: (
+    patientName: string,
+    doctorName:  string,
+    date:        string
+  ) => `🏥 *MediCare Pro*
+
 ❌ *Appointment Cancelled*
 
 Hello ${patientName},
-Your appointment scheduled for ${date} has been cancelled. 
-Please contact us to reschedule.`.trim(),
 
-  labReportReady: (patientName: string) => `
-🏥 *MediCare Pro*
-🔬 *Lab Report Ready*
+Your appointment with Dr. ${doctorName} on ${date} has been cancelled.
 
-Hello ${patientName},
-Your laboratory test results are now ready. You can collect them from the reception or view them in your portal.`.trim(),
+To reschedule, please contact reception.
 
-  billGenerated: (patientName: string, amount: string) => `
-🏥 *MediCare Pro*
-🧾 *Invoice Generated*
+_MediCare Pro_`.trim(),
 
-Hello ${patientName},
-A new bill has been generated for your recent visit.
-💰 Total Amount: Rs. ${amount}
-Please clear the dues at the billing counter.`.trim(),
+  labReportReady: (
+    patientName: string,
+    testName:    string
+  ) => `🏥 *MediCare Pro*
 
-  paymentReceived: (patientName: string, amount: string) => `
-🏥 *MediCare Pro*
-💳 *Payment Confirmed*
+🧪 *Lab Report Ready!*
 
 Hello ${patientName},
-We have successfully received your payment of Rs. ${amount}.
-Thank you for the transaction.`.trim(),
 
-  prescriptionReady: (patientName: string) => `
-🏥 *MediCare Pro*
+Your lab report is ready:
+📋 Test: ${testName}
+
+Please login to patient portal to view your report.
+
+_MediCare Pro Laboratory_`.trim(),
+
+  billGenerated: (
+    patientName: string,
+    invoiceNo:   string,
+    amount:      number,
+    dueDate:     string
+  ) => `🏥 *MediCare Pro*
+
+💰 *Invoice Generated*
+
+Hello ${patientName},
+
+Your invoice has been generated:
+📋 Invoice: ${invoiceNo}
+💵 Amount: PKR ${amount.toLocaleString()}
+📅 Due Date: ${dueDate}
+
+Payment: JazzCash, EasyPaisa or Cash at reception.
+
+_MediCare Pro Billing_`.trim(),
+
+  paymentReceived: (
+    patientName: string,
+    amount:      string | number,
+    method?:     string,
+    invoiceNo?:  string
+  ) => `🏥 *MediCare Pro*
+
+✅ *Payment Received*
+
+Hello ${patientName},
+
+Your payment has been received:
+💵 Amount: PKR ${typeof amount === 'number' ? amount.toLocaleString() : amount}
+${method    ? `💳 Method: ${method}`       : ''}
+${invoiceNo ? `📋 Invoice: ${invoiceNo}`   : ''}
+
+Thank you!
+
+_MediCare Pro_`.trim(),
+
+  prescriptionReady: (
+    patientName: string,
+    doctorName?: string
+  ) => `🏥 *MediCare Pro*
+
 💊 *Prescription Ready*
 
 Hello ${patientName},
-Your prescription has been uploaded by the doctor. You can now collect your medicines from the pharmacy.`.trim(),
 
-  dueBillReminder: (patientName: string, amount: string) => `
-🏥 *MediCare Pro*
-⚠️ *Payment Due*
+${doctorName ? `Dr. ${doctorName} has` : 'Your doctor has'} written a prescription for you.
+
+Please login to patient portal to view your prescription.
+
+_MediCare Pro_`.trim(),
+
+  dueBillReminder: (
+    patientName: string,
+    invoiceNo:   string,
+    dueAmount:   number,
+    dueDate:     string
+  ) => `🏥 *MediCare Pro*
+
+⚠️ *Payment Due Reminder*
 
 Hello ${patientName},
-This is a reminder regarding your pending balance of Rs. ${amount}.
-Please settle the payment at your earliest convenience.`.trim(),
 
-  welcomePatient: (patientName: string) => `
-🏥 *MediCare Pro*
+Outstanding payment:
+📋 Invoice: ${invoiceNo}
+💵 Due Amount: PKR ${dueAmount.toLocaleString()}
+📅 Due Date: ${dueDate}
+
+Please clear dues to avoid inconvenience.
+
+_MediCare Pro Billing_`.trim(),
+
+  welcomePatient: (
+    patientName: string
+  ) => `🏥 *MediCare Pro*
+
 👋 *Welcome!*
 
 Hello ${patientName},
-Welcome to MediCare Pro! We are committed to providing you with the best healthcare services.`.trim(),
 
-  customMessage: (message: string) => message.trim(),
+Welcome to MediCare Pro! Your patient account has been created.
+
+You can now:
+📅 Book appointments online
+💊 View prescriptions
+🧪 Check lab reports
+💰 Pay bills online
+
+_MediCare Pro — Your Health, Our Priority_`.trim(),
+
+  pharmacyBillReady: (
+    patientName: string,
+    billNo:      string,
+    amount:      number
+  ) => `🏥 *MediCare Pro Pharmacy*
+
+🧾 *Pharmacy Bill Ready*
+
+Hello ${patientName},
+
+Your pharmacy bill:
+📋 Bill: ${billNo}
+💵 Amount: PKR ${amount.toLocaleString()}
+
+Please collect medicines from pharmacy counter.
+
+_MediCare Pro Pharmacy_`.trim(),
 };

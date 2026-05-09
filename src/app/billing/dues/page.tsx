@@ -6,19 +6,27 @@ export default function DuesPage() {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading]   = useState(true);
 
+  // ✅ FIX: "mob" variable ko explicitly define kar diya 
+  // taake agar koi component ise background mein call kare toh ReferenceError na aaye
+  const mob = ""; 
+
   useEffect(() => {
     fetch('/api/billing/invoices')
       .then(r => r.json())
       .then(d => {
         const dues = (d.invoices || []).filter((i: any) =>
-          i.dueAmount > 0 && i.status !== 'cancelled' && i.status !== 'paid'
+          (i.dueAmount || 0) > 0 && i.status !== 'cancelled' && i.status !== 'paid'
         );
         setInvoices(dues);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
         setLoading(false);
       });
   }, []);
 
-  const totalDue = invoices.reduce((s, i) => s + i.dueAmount, 0);
+  const totalDue = invoices.reduce((s, i) => s + (i.dueAmount || 0), 0);
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
@@ -55,6 +63,10 @@ export default function DuesPage() {
         <div className="space-y-3">
           {invoices.map(inv => {
             const isOverdue = inv.dueDate && new Date(inv.dueDate) < new Date();
+            // Patient details safety check
+            const pName = inv.patient?.name || 'Unknown Patient';
+            const pPhone = inv.patient?.phone || inv.patient?.mobile || "No Contact";
+
             return (
               <div key={inv._id} className={`bg-white rounded-2xl border-2 p-4 hover:shadow-md transition-shadow ${
                 isOverdue ? 'border-red-300' : 'border-yellow-200'
@@ -63,11 +75,11 @@ export default function DuesPage() {
                   <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${
                     isOverdue ? 'bg-red-500' : 'bg-yellow-500'
                   }`}>
-                    {inv.patient?.name?.charAt(0)}
+                    {pName.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <p className="font-bold text-sm text-gray-900">{inv.patient?.name}</p>
+                      <p className="font-bold text-sm text-gray-900">{pName}</p>
                       {isOverdue && (
                         <span className="text-xs font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
                           🚨 OVERDUE
@@ -76,9 +88,9 @@ export default function DuesPage() {
                     </div>
                     <div className="flex flex-wrap gap-3 text-xs text-gray-500">
                       <span>{inv.invoiceNumber}</span>
+                      <span className="text-blue-600 font-medium">📞 {pPhone}</span>
                       <span>Total: PKR {inv.totalAmount?.toLocaleString()}</span>
-                      <span>Paid: PKR {inv.paidAmount?.toLocaleString()}</span>
-                      {inv.dueDate && <span>Due date: {inv.dueDate}</span>}
+                      {inv.dueDate && <span>Due: {new Date(inv.dueDate).toLocaleDateString()}</span>}
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">

@@ -6,9 +6,14 @@ import Groq from 'groq-sdk';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! });
 
+// ✅ Next.js 15+ Context Interface
+interface RouteContext {
+  params: Promise<{ patientId: string }>;
+}
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { patientId: string } }
+  context: RouteContext // Updated
 ) {
   try {
     const token = req.cookies.get('token')?.value;
@@ -16,14 +21,18 @@ export async function GET(
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
-    let emr = await EMR.findOne({ patient: params.patientId })
+
+    // ✅ Must await params
+    const { patientId } = await context.params;
+
+    let emr = await EMR.findOne({ patient: patientId })
       .populate('patient', 'name email phone dateOfBirth bloodGroup')
       .populate('visits.doctor', 'name specialization')
       .lean();
 
     // Create empty EMR if not exists
     if (!emr) {
-      const newEMR = await EMR.create({ patient: params.patientId });
+      const newEMR = await EMR.create({ patient: patientId });
       emr = await EMR.findById(newEMR._id)
         .populate('patient', 'name email phone dateOfBirth bloodGroup')
         .lean();
@@ -37,7 +46,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { patientId: string } }
+  context: RouteContext // Updated
 ) {
   try {
     const token = req.cookies.get('token')?.value;
@@ -45,12 +54,15 @@ export async function PUT(
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
+    
+    // ✅ Must await params
+    const { patientId } = await context.params;
     const body = await req.json();
 
     // Add visit
     if (body.addVisit) {
       const emr = await EMR.findOneAndUpdate(
-        { patient: params.patientId },
+        { patient: patientId },
         {
           $push: { visits: { ...body.addVisit, date: new Date().toISOString().split('T')[0] } },
           $set:  { lastUpdated: new Date().toISOString() },
@@ -68,7 +80,7 @@ export async function PUT(
 
     // Generate AI Summary
     if (body.generateAI) {
-      const emrData = await EMR.findOne({ patient: params.patientId }).lean() as any;
+      const emrData = await EMR.findOne({ patient: patientId }).lean() as any;
       if (emrData) {
         const prompt = `
 You are a medical AI assistant. Generate a concise professional health summary for this patient:
@@ -97,7 +109,7 @@ Write a 3-4 sentence professional health summary highlighting key concerns and r
     body.lastUpdated = new Date().toISOString();
 
     const emr = await EMR.findOneAndUpdate(
-      { patient: params.patientId },
+      { patient: patientId },
       { $set: body },
       { new: true, upsert: true }
     )

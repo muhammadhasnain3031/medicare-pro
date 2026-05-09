@@ -3,9 +3,14 @@ import { connectDB } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import Invoice from '@/models/Invoice';
 
+// ✅ Define Context Interface for Next.js 15+
+interface RouteContext {
+  params: Promise<{ id: string }>;
+}
+
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext // Changed from direct params
 ) {
   try {
     const token = req.cookies.get('token')?.value;
@@ -13,10 +18,16 @@ export async function GET(
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
-    const invoice = await Invoice.findById(params.id)
+
+    // ✅ Await the params promise
+    const { id } = await context.params;
+
+    const invoice = await Invoice.findById(id)
       .populate('patient', 'name phone email address bloodGroup dateOfBirth')
       .populate('doctor',  'name specialization qualification')
       .lean();
+
+    if (!invoice) return NextResponse.json({ message: 'Not found' }, { status: 404 });
 
     return NextResponse.json({ invoice });
   } catch (err: any) {
@@ -26,7 +37,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext // Changed from direct params
 ) {
   try {
     const token = req.cookies.get('token')?.value;
@@ -34,11 +45,14 @@ export async function PUT(
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
+
+    // ✅ Await the params promise
+    const { id } = await context.params;
     const body = await req.json();
 
     // Partial payment add karo
     if (body.addPayment) {
-      const invoice = await Invoice.findById(params.id);
+      const invoice = await Invoice.findById(id);
       if (!invoice) return NextResponse.json({ message: 'Not found' }, { status: 404 });
 
       const newPaid = invoice.paidAmount + body.addPayment.amount;
@@ -58,7 +72,7 @@ export async function PUT(
       });
       await invoice.save();
 
-      const updated = await Invoice.findById(params.id)
+      const updated = await Invoice.findById(id)
         .populate('patient', 'name phone email')
         .populate('doctor',  'name specialization')
         .lean();
@@ -67,7 +81,7 @@ export async function PUT(
 
     // Status update
     const updated = await Invoice.findByIdAndUpdate(
-      params.id, { $set: body }, { new: true }
+      id, { $set: body }, { new: true }
     )
     .populate('patient', 'name phone email')
     .populate('doctor',  'name specialization')
@@ -81,7 +95,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext // Changed from direct params
 ) {
   try {
     const token = req.cookies.get('token')?.value;
@@ -89,7 +103,11 @@ export async function DELETE(
     if (!user) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
     await connectDB();
-    await Invoice.findByIdAndUpdate(params.id, { status: 'cancelled' });
+
+    // ✅ Await the params promise
+    const { id } = await context.params;
+
+    await Invoice.findByIdAndUpdate(id, { status: 'cancelled' });
     return NextResponse.json({ message: 'Cancelled' });
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });

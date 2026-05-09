@@ -19,7 +19,7 @@ export default function BedsLayout({ children }: { children: React.ReactNode }) 
   const pathname = usePathname();
   const [mob, setMob] = useState(false);
 
-  useEffect(() => {
+useEffect(() => {
   document.body.style.overflow = mob ? 'hidden' : 'unset';
   return () => { document.body.style.overflow = 'unset'; };
 }, [mob]);

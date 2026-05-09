@@ -237,7 +237,7 @@ export default function EMRPage() {
                 ['Surgical History', emr.surgicalHistory || 'No major surgeries reported'],
                 ['Immunization', emr.immunizationStatus || 'Up to date']
             ],
-            headStyles: { fillStyle: [30, 58, 138] }
+           headStyles: { fillColor: [30, 58, 138] }
         });
 
         doc.save(`EMR_REPORT_${emr.patient?.name}.pdf`);

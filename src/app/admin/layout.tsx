@@ -11,14 +11,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   
   // 2. State definition (Ab ye define hai)
-  const [mob, setMob] = useState(false);
+  // ✅ Correct pattern — har layout mein yeh hona chahiye
+const [mob, setMob] = useState(false);
 
-  // Body scroll lock logic
-  useEffect(() => {
-    document.body.style.overflow = mob ? 'hidden' : 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [mob]);
-
+useEffect(() => {
+  document.body.style.overflow = mob ? 'hidden' : 'unset';
+  return () => { document.body.style.overflow = 'unset'; };
+}, [mob]);
   // Auth Protection logic
   useEffect(() => {
     if (!loading && (!user || user.role !== 'admin')) {

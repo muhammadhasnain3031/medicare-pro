@@ -1,10 +1,12 @@
+import { sendNotification } from '@/lib/notifications';
+import { NotificationTemplates } from '@/lib/notification-templates';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
 import Invoice from '@/models/Invoice';
 
-import { sendNotification, NotificationTemplates } from '@/lib/notifications';
-import NotificationLog from '@/models/NotificationLog';
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -125,36 +127,7 @@ export async function POST(req: NextRequest) {
       .populate('doctor',  'name specialization')
       .lean();
 
-    // 🔥 ✅ Notification integration (SAFE)
-    if (populated && populated.patient?.phone) {
-      try {
-        const msg = NotificationTemplates.billGenerated(
-          populated.patient.name || 'Patient',
-          populated.invoiceNumber,
-          populated.totalAmount,
-          body.dueDate || 'N/A'
-        );
-
-        const result = await sendNotification(
-          populated.patient.phone,
-          msg,
-          'whatsapp'
-        );
-
-        await NotificationLog.create({
-          recipient: populated.patient.name,
-          phone:     populated.patient.phone,
-          channel:   'whatsapp',
-          type:      'bill_generated',
-          message:   msg,
-          status:    result.success ? 'sent' : 'failed',
-        });
-
-      } catch (e) {
-        console.error('Invoice notification failed:', e);
-      }
-    }
-
+    
     return NextResponse.json(
       { invoice: populated },
       { status: 201 }

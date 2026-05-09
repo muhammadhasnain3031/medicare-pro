@@ -415,44 +415,47 @@ export default function PharmacyStock() {
       )}
 
       {/* ✅ RESTOCK MODAL */}
+      {/* RESTOCK MODAL */}
       {showRestock && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl">
             {restockDone ? (
-              <div className="text-center py-4">
+              <div className="text-center py-6">
                 <p className="text-5xl mb-3">✅</p>
-                <p className="font-bold text-green-700 text-lg">Restock Successful!</p>
+                <p className="font-bold text-green-700 text-lg">
+                  Restock Successful!
+                </p>
                 <p className="text-gray-500 text-sm mt-2">
-                  {showRestock.name} — New stock: {(medicines.find(m => m._id === showRestock._id)?.stock) ?? '...'} {showRestock.unit}
+                  {showRestock.name} updated successfully
                 </p>
               </div>
             ) : (
               <>
+                {/* Header */}
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="font-bold text-gray-900 text-lg">➕ Restock Medicine</h3>
-                  <button onClick={() => setShowRestock(null)}
-                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg">✕</button>
+                  <h3 className="font-bold text-gray-900 text-lg">
+                    ➕ Restock Medicine
+                  </h3>
+                  <button
+                    onClick={() => setShowRestock(null)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg"
+                  >
+                    ✕
+                  </button>
                 </div>
 
                 {/* Current info */}
                 <div className="bg-green-50 border border-green-200 rounded-xl p-3 mb-4">
-                  <p className="font-bold text-sm text-gray-900">{showRestock.name}</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Category: {showRestock.category} · Unit: {showRestock.unit}
+                  <p className="font-bold text-sm text-gray-900">
+                    {showRestock.name}
                   </p>
-                  <div className="flex justify-between mt-2">
+                  <div className="flex justify-between mt-3">
                     <div className="text-center">
-                      <p className="text-xs text-gray-400">Current Stock</p>
-                      <p className={`text-xl font-black ${showRestock.stock <= showRestock.minStock ? 'text-red-600' : 'text-gray-900'}`}>
-                        {showRestock.stock}
-                      </p>
+                      <p className="text-xs text-gray-400">Current</p>
+                      <p className="text-xl font-black text-gray-900">{showRestock.stock}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-gray-400">Min Level</p>
-                      <p className="text-xl font-black text-orange-600">{showRestock.minStock}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xs text-gray-400">After Restock</p>
+                      <p className="text-xs text-gray-400">After</p>
                       <p className="text-xl font-black text-green-600">
                         {showRestock.stock + (Number(restockQty) || 0)}
                       </p>
@@ -460,4 +463,54 @@ export default function PharmacyStock() {
                   </div>
                 </div>
 
-                {/* Quick amounts
+                {/* Quick buttons */}
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {[10, 20, 50, 100].map((qty) => (
+                    <button
+                      key={qty}
+                      type="button"
+                      onClick={() => setRestockQty(String(qty))}
+                      className="py-2 bg-gray-100 hover:bg-green-100 rounded-xl text-sm font-semibold"
+                    >
+                      +{qty}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input */}
+                <div className="mb-5">
+                  <input
+                    type="number"
+                    value={restockQty}
+                    onChange={(e) => setRestockQty(e.target.value)}
+                    placeholder="Enter quantity"
+                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none"
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowRestock(null)}
+                    className="flex-1 py-2.5 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRestock}
+                    disabled={saving || !restockQty}
+                    className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-bold disabled:opacity-50"
+                  >
+                    {saving ? '...' : 'Confirm'}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

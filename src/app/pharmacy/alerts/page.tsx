@@ -10,6 +10,12 @@ export default function PharmacyAlerts() {
   const [lowStock, setLowStock]   = useState<Medicine[]>([]);
   const [expiring, setExpiring]   = useState<Medicine[]>([]);
   const [loading, setLoading]     = useState(true);
+const [mob, setMob] = useState(false);
+
+useEffect(() => {
+  document.body.style.overflow = mob ? 'hidden' : 'unset';
+  return () => { document.body.style.overflow = 'unset'; };
+}, [mob]);
 
   useEffect(() => {
     Promise.all([

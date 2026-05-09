@@ -18,11 +18,12 @@ export default function BillingLayout({ children }: { children: React.ReactNode 
   const router   = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  useEffect(() => {
+  const [mob, setMob] = useState(false);
+
+useEffect(() => {
   document.body.style.overflow = mob ? 'hidden' : 'unset';
   return () => { document.body.style.overflow = 'unset'; };
 }, [mob]);
-
   useEffect(() => {
     if (!loading && (!user || !['admin','receptionist','superadmin'].includes(user.role)))
       router.push('/login');

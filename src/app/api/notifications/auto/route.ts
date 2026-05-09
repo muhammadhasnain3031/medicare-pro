@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { verifyToken } from '@/lib/auth';
-import { sendNotification, NotificationTemplates } from '@/lib/notifications';
+import { sendNotification } from '@/lib/notifications';
+import { NotificationTemplates } from '@/lib/notification-templates';
 import NotificationLog from '@/models/NotificationLog';
 import Appointment from '@/models/Appointment';
 import Invoice from '@/models/Invoice';
-import User from '@/models/User';
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const { type } = await req.json();
     let sent = 0, failed = 0;
 
-    // Tomorrow's appointment reminders
+    // ── Appointment Reminders ─────────────────────────────
     if (type === 'appointment_reminders') {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
       const appointments = await Appointment.find({
         date:   tomorrowStr,
-        status: { $in: ['confirmed','pending'] },
+        status: { $in: ['confirmed', 'pending'] },
       })
       .populate('patient', 'name phone')
       .populate('doctor',  'name')
@@ -34,13 +34,18 @@ export async function POST(req: NextRequest) {
 
       for (const apt of appointments) {
         const patient = apt.patient as any;
+        const doctor  = apt.doctor  as any;
         if (!patient?.phone) continue;
 
         const msg = NotificationTemplates.appointmentReminder(
-          patient.name, (apt.doctor as any)?.name, apt.date, apt.time
+          patient.name   || 'Patient',
+          doctor?.name   || 'Doctor',
+          apt.date       || '',
+          apt.time       || '',
         );
 
         const result = await sendNotification(patient.phone, msg, 'whatsapp');
+
         await NotificationLog.create({
           recipient: patient.name,
           phone:     patient.phone,
@@ -57,11 +62,11 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Overdue bill reminders
+    // ── Bill Due Reminders ────────────────────────────────
     if (type === 'bill_reminders') {
       const invoices = await Invoice.find({
         dueAmount: { $gt: 0 },
-        status:    { $nin: ['paid','cancelled'] },
+        status:    { $nin: ['paid', 'cancelled'] },
       })
       .populate('patient', 'name phone')
       .lean();
@@ -71,13 +76,14 @@ export async function POST(req: NextRequest) {
         if (!patient?.phone) continue;
 
         const msg = NotificationTemplates.dueBillReminder(
-          patient.name,
-          inv.invoiceNumber,
-          inv.dueAmount,
-          inv.dueDate || 'N/A'
+          patient.name       || 'Patient',
+          inv.invoiceNumber  || 'N/A',
+          inv.dueAmount      || 0,
+          inv.dueDate        || 'N/A',
         );
 
         const result = await sendNotification(patient.phone, msg, 'whatsapp');
+
         await NotificationLog.create({
           recipient: patient.name,
           phone:     patient.phone,
@@ -85,6 +91,7 @@ export async function POST(req: NextRequest) {
           type:      'bill_reminder',
           message:   msg,
           status:    result.success ? 'sent' : 'failed',
+          error:     (result as any).error || '',
           sentBy:    decoded.id,
         });
 
@@ -96,9 +103,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: `Done: ${sent} sent, ${failed} failed`,
-      sent, failed,
+      sent,
+      failed,
     });
   } catch (err: any) {
+    console.error('Auto notification error:', err);
     return NextResponse.json({ message: err.message }, { status: 500 });
   }
 }
